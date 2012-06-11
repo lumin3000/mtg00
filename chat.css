@@ -9,21 +9,6 @@ a {
 .container-fluid {padding:3px}
 
 
-#messageBox {
-  width:300px;
-}
-
-
-
-#chat {
-  height: 300px;
-  width: 440px;
-  overflow: scroll;
-  padding: 10px 10px 40px 10px;
-  border: 1px black solid;
-}
-
-
 .link {
   cursor:pointer
 }
@@ -235,6 +220,14 @@ div.loaded {
   height:100px
 }
 
+.operations{
+  line-height: 160%;  
+}
+
+.operations hr{
+  margin:5px 0px
+}
+
 .operations,
 .board{
   width:50%;
@@ -257,6 +250,7 @@ div.loaded {
 .fieldcard button{
   text-shadow:-1px 0 yellow, 0 1px yellow, 1px 0 yellow, 0 -1px yellow;
   font-size:20px;
+  line-height:125%;
 }
 
 .opponent,
@@ -272,9 +266,29 @@ div.loaded {
   position:relative;
 }
 
-.sideway .chatroom,
+
 .sideway .self{
   height:204px;
+}
+
+.sideway .chatroom{
+  height:204px;
+  clear:both;
+  font-size: 12px;
+  line-height: 120%;
+}
+
+.sideway .chatroom .messages{
+  height:167px;
+  overflow-y:scroll;
+  margin-bottom:5px
+}
+.sideway .chatroom .messages div{
+  margin-bottom: 8px;
+}
+
+.sideway .chatroom #messageInput{
+  width:120px
 }
 
 .battles .modal{
@@ -291,7 +305,7 @@ div.loaded {
   position:relative;
 }
 
-
+.fieldcard,
 .handcard{
   display:inline-block
 }

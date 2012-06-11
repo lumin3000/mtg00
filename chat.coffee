@@ -6,6 +6,22 @@ BattleLogs = new Meteor.Collection "battlelogs"
 BattleDecks= new Meteor.Collection "battledecks"
 Site       = new Meteor.Collection "site"
 
+
+
+message = (->
+  messagesId:false
+  create:(d,u)->
+    Messages.insert messages:[user:u||user.show(),message:d.message,type:d.type]
+  update:(d,id,u)->
+    d = message:d,type:'normal' if typeof d == 'string'
+    messages = @index @messagesId||id
+    messages = messages.splice(messages.length-101) if message.length-101>0
+    messages.push user:u||user.show(),message:d.message,type:d.type
+    Messages.update (_id:@messagesId||id),messages:messages
+  index:(id)->
+    Messages.findOne(_id:id).messages
+)() 
+
 if Meteor.is_client
 
 #some helper
@@ -75,6 +91,16 @@ if Meteor.is_client
         Session.set 'pages','portal'       
   )()
   
+  confirm = (->
+    create:(word,fn)->
+      dom = $ '#modalConfirm'
+      $('#theWordsToBeComfirm').html word
+      $('#modalConfirm .btn-primary').click ->
+        dom.modal 'hide'
+        fn()
+      dom.modal 'show'
+  )()  
+  
   portal = (->
     Template.portal.events =
       'click #gotodeck': ->
@@ -86,6 +112,7 @@ if Meteor.is_client
         user.auth 'arenaentry'
   )() 
  
+
   
   user = (->
     
@@ -135,6 +162,7 @@ if Meteor.is_client
       life:20
       poison:0
       turn:false
+      fighting:false
       
     nullBattle = 
       south:$.extend {}, nullPlayer
@@ -174,9 +202,14 @@ if Meteor.is_client
     count_rel = (target)->
       rel = target.attr 'rel'
       parseInt rel,10 if rel!=''
-         
-      
-      
+    
+            
+    Template.messages.messages = ->
+      if message.messagesId
+        Meteor.setTimeout (->$("#messages").scrollTop 9999999),150
+        message.index message.messagesId
+      else
+        []
     
     Template.battles.battle = ->
       data = battle.store.get()
@@ -188,9 +221,9 @@ if Meteor.is_client
         for i in data[el].battlefield
           i.html=[]
           i.html.push "#{$('<div/>').text(i.txt).html()}" if typeof i.txt == 'string'
-          i.html.push if i.counters==0 then '' else "#{i.counters}/#{i.counters}"
           i.html.push '⬅ 佩带/附着'if i.attaching
-          i.html = i.html.join('<br />')+'<br /><br /><br /><br />&nbsp;'
+          i.html.push if i.counters==0 then '' else "#{i.counters}/#{i.counters}"
+          i.html = "#{i.html.join '<br />'}<br /><br />&nbsp;"
           if i.image.indexOf('/land/')>=0
             data[el].land.push index:_i,item:i
           else
@@ -202,6 +235,9 @@ if Meteor.is_client
     Template.battledeck.battleId = ->
       Session.get 'battleId'
     
+    
+    Template.battleentry.battleId = ->
+      $.cookie('battleId') || ''
     Template.battleentry.events=
       'click #new-battle-btn': ->
         battle.create battle.edit
@@ -210,35 +246,68 @@ if Meteor.is_client
           battle.join $("#battle-entry-input").val()
       'click #battle-entry-btn': ->
         battle.join $("#battle-entry-input").val()
-        
-    
 
 
-    battlelinks = (source,e)->
-      
-        
     Template.battles.events = 
+      'keyup #messageInput':(event)->
+        dom = $ event.target
+        if event.type == "keyup" && event.which == 13 && dom.val()!='' # [ENTER] 
+          message.update dom.val()
+          dom.val ''
       'click #turnBegin':->
         battle.play 'turnBegin'
+        message.update message:'回合开始',type:'inverse'
       'click #turnFin':->
-        battle.play 'turnFin'        
-      'click #libHand7':->
-        battle.play 'libraryToHand',0,7
+        battle.play 'turnFin'
+        message.update message:'回合结束',type:'inverse'
+      'click #shuffle':->
+        battle.play 'shuffle'
+        message.update message:'洗了一次牌',type:'inverse'  
       'click #libToHand':->
         battle.play 'libraryToHand',0,1
+        message.update message:'摸了一张牌',type:'inverse' 
       'click #libToExamine':->
         battle.play 'libraryToExamine',0,1
+        message.update message:'检视一张牌',type:'inverse'
+      'click #preModalLibrary':->
+        confirm.create '查看牌库是一个公开动作,确定要继续么?',->
+          $('#modalLibrarySelf').modal 'show'
+          message.update message:'查看牌库',type:'inverse' 
       'click #handToReveals':->
         battle.play 'handToReveals',0,1000
+        message.update message:'展示手牌',type:'inverse' 
       'click #tokenCreate':->
         battle.play 'tokenCreate'
+        message.update message:'创建一个衍生物',type:'inverse' 
       'keyup #txtInput': (event) ->
         if event.type == "keyup" && event.which == 13# [ENTER]
           playHelper.txt $('#txtHidden').val(),$('#txtInput').val()
       'click #txtBtn': ->
         playHelper.txt $('#txtHidden').val(),$('#txtInput').val()
-      'click #shuffle':->
-        battle.play 'shuffle'
+      'click #lifePlus':->battle.play 'lifePlus',0,->message.update message:'生命+1',type:'inverse'
+      'click #lifeMinus':->battle.play 'lifeMinus',0,->message.update message:'生命-1',type:'inverse'
+      'click #poisonPlus':->battle.play 'poisonPlus',0,->message.update message:'中毒+1',type:'inverse'
+      'click #poisonMinus':->battle.play 'poisonMinus',0,->message.update message:'中毒-1',type:'inverse'
+      'click #libHand7':->
+        confirm.create '是否确认要摸七张牌?',->
+          battle.play 'libraryToHand',0,7
+          message.update message:'摸了七张牌',type:'inverse'
+      'click #fightFin':->
+        confirm.create '<span class="alert alert-error">是否确认要放弃比赛? 此动作不可撤销哟</span>', ->
+          battle.play 'fightFin',nullPlayer,->
+            message.update message:'已经放弃比赛了',type:'important'           
+            battle.edit()
+      'click #msgDice':->
+        message.update message:"掷了个骰子: #{parseInt Math.random()*21,10}",type:'inverse'
+      'click #msgPreAttack':->
+        message.update message:'准备攻击',type:'warning'
+      'click #msgPreFin':->
+        message.update message:'准备结束回合',type:'warning'
+      'click #msgPass':->
+        message.update message:'左思右量还是让过好了',type:'success'
+        
+
+          
 
       'click #modalLibrarySelf .dir_images':(e)->
         dom = $ e.target
@@ -353,7 +422,7 @@ if Meteor.is_client
         dom = $ e.target
         dom.css 'display','none'
         dom.empty()
- 
+    
     playHelper = (->
       changePositionCache=false
       changePositionBegin:(sourceIndex)->
@@ -368,13 +437,11 @@ if Meteor.is_client
         @changePositionBegin sourceIndex
         @changePositionFin true
       txtModal:(index)->
-        console.log index
-        $('#txtHidden').val index
         $('#modalTxt').modal 'show'
+        $('#txtHidden').val "#{index}"
       txt:(index,str)->
         index = parseInt index,10
         $('#modalTxt').modal 'hide'
-        console.log "index:#{index};str:#{str}"
         Meteor.call 'txt',battleId,player,index,str
     )() 
  
@@ -383,8 +450,9 @@ if Meteor.is_client
       ((eventName)->
         Template.battles.events["click .#{eventName}"] = (e)->
           stopEvent e
-          target = $ e.target
+          target = $ e.target 
           closeModal()
+          console.log "eventName:#{eventName}"
           battle.play eventName,index_name(target),count_rel target
       ) eventName for eventName in methods
     
@@ -394,7 +462,9 @@ if Meteor.is_client
     newPlayer = (data)-> #should return south || north || undefined
       for el in ['south','north']
         return el if data[el].user==''
-
+    saveBattleId = (id)->
+      Session.set 'battleId',id
+      $.cookie 'battleId',id,expires:30 
 
         
     play:(fn,index,count)->
@@ -429,8 +499,7 @@ if Meteor.is_client
         data
       find: (bid)->
         data = Battles.findOne battleId:parseInt bid,10
-        if data then data._id else false
-        
+        if data then data._id else false    
     #player:player
     #opponent:opponent
     create: (next)->
@@ -439,42 +508,52 @@ if Meteor.is_client
         data.south.user = user.show()
         data.battleId = site.battle.show().battle
         battleId = Battles.insert data
-        Session.set 'battleId',data.battleId
+        saveBattleId data.battleId
         #Session.set 'battle',JSON.stringify data
         next()
-    join:(bid)->
+    join:(bid)-> 
       battleId = @store.find bid
-      console.log "battleId:"+battleId
       return false if battleId == false
       data = @store.get()
       player = getPlayer data
       if player == 'north' || player=='south'
-        return @show() if data[player].deck!='' && data[player].library.length>0
+        return @show() if data[player].fighting
       if typeof player == 'undefined'
         player = newPlayer data
       return false if typeof player == 'undefined'
       data[player].user = user.show()
       @store.set data, =>
-        Session.set 'battleId',data.battleId
+        saveBattleId data.battleId
         @edit()
     edit:->
       Session.set 'pages','arenadeck'
       deck.deleteSession()
     show: ()->
+      saveMessagesId = (id)->message.messagesId = id
       data = @store.get()
       player = getPlayer data
       opponent = if player =='south' then 'north' else 'south'
-      console.log player
-      if data[player].deck=='' || data[player].library.length==0
+      saveBattleId data.battleId
+      if data[player].fighting
+        saveMessagesId data.log
+        return Session.set 'pages','arena' 
+      else
         myDeck = deck.store.get()
         return true if !myDeck._id
         delete myDeck._id
-        myDeckId = BattleDecks.insert myDeck
-        #Session.set 'myLibrary', JSON.stringify myDeck.deck1        
-        data[player].deck = myDeckId
+        welcomeMsg = message:'加入比赛',type:'info'
+        if data.log==''
+          data.log = message.create welcomeMsg
+          saveMessagesId data.log
+        else
+          saveMessagesId data.log
+          message.update welcomeMsg 
+        saveMessagesId data.log
+        data[player].deck = BattleDecks.insert myDeck
         data[player].library = @library.create myDeck.deck1 
-      @store.set data,->
-        Session.set 'pages','arena'
+        data[player].fighting = true
+      @store.set data,->Session.set 'pages','arena'
+
     init:->
       self = this
   )()
@@ -714,37 +793,6 @@ if Meteor.is_client
       $('#deck-toggle a:first').tab('show')
   )()
 
-    
-  # Export Messages model to client
-  window.Messages = Messages
-  
-  # Load all documents in messages collection from Mongo
-  Template.messages.messages = ->
-    Messages.find({}, { sort: {time: -1} })
-
-
-  # Listen for the following events on the entry template
-  Template.entry.events =
-    # All keyup events from the #messageBox element
-    'keyup #messageBox': (event) ->
-      if event.type == "keyup" && event.which == 13 # [ENTER]
-        new_message = $("#messageBox")
-        name = $("#name")
-
-        # Save values into Mongo
-        Messages.insert
-          name: name.val(),
-          message: new_message.val(),
-          created: new Date()
-
-        # Clear the input boxes
-        new_message.val("")
-        new_message.focus()
-
-        # Make sure new chat messages are visible
-        $("#chat").scrollTop 9999999;
-
-  
   
   main = ->
     loading = Meteor.setInterval (->

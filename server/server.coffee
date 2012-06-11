@@ -29,8 +29,6 @@ battleMethods =
   tokenDestory:(r)->
     r.d if r.d[r.p].battlefield.splice r.index,1
   txt:(r)->
-    console.log "txt:#{r.count}"
-    console.log "r.index:#{r.index}"
     r.d[r.p].battlefield[r.index].txt=r.count
     r.d
 
@@ -62,8 +60,10 @@ Meteor.methods
             (r)->
               if r.count
                 r.d[r.p][target] = store(r,source).splice(r.index,r.count||1).concat store r,target
+                message.update (message:"将#{r.count||1}张牌放入了牌库顶",type:'inverse'),r.d.log,r.d[r.p].user
               else
                 r.d[r.p][target] = store(r,target).concat store(r,source).splice r.index,r.count||1
+                message.update (message:"将#{r.count||1}张牌放入了牌库底",type:'inverse'),r.d.log,r.d[r.p].user
               storeFx r,target
         else if preTarget == "Battlefield"
           battleMethods[methodName] = lowerCase preTarget,(target)->
@@ -113,6 +113,22 @@ battleMethods2=
     d[Battle.getOpponent player].turn = true
     d[player].turn = false
     Battle.update d
+  lifePlus:(battleId,player)->
+    d = Battle.show battleId  
+    d[player].life++
+    Battle.update d   
+  lifeMinus:(battleId,player)->
+    d = Battle.show battleId  
+    d[player].life--
+    Battle.update d
+  poisonPlus:(battleId,player)->
+    d = Battle.show battleId  
+    d[player].poison++
+    Battle.update d   
+  poisonMinus:(battleId,player)->
+    d = Battle.show battleId  
+    d[player].poison--
+    Battle.update d     
   shuffle:(battleId,player)->
     d = Battle.show battleId
     d[player].library.shuffle()
@@ -122,16 +138,24 @@ battleMethods2=
     d[player].library = d[player].library.concat tempArray[i] for i in [0..tempArray.length-1]
     Battle.update d
   attach:(battleId,player,sourceIndex,targetIndex)->
-    d = Battle.show battleId  
+    d = Battle.show battleId
+    d[player].battlefield[sourceIndex].attaching = if targetIndex==0 then false else true
     d[player].battlefield.splice targetIndex,0,d[player].battlefield.splice(sourceIndex,1)[0]
-    d[player].battlefield[targetIndex].attaching = if targetIndex==0 then false else true
     Battle.update d
   tokenCreate:(battleId,player)->
     d = Battle.show battleId  
     d[player].battlefield = [image:'transparent.png',counters:1,token:true].concat d[player].battlefield
     Battle.update d
+  fightFin:(battleId,player,nullPlayer)->
+    d = Battle.show battleId  
+    for key,value of nullPlayer
+      d[player][key]=value if key!='user'
+    d.stack=d.reveals=[]
+    Battle.update d
 
 Meteor.methods battleMethods2
+
+
 
 
 

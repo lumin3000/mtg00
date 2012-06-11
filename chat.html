@@ -18,9 +18,7 @@
       </div>
     <div class="deck page">
       {{> nav}}
-      {{> dirs}}
-      {{> messages}}
-      {{> entry}}      
+      {{> dirs}}   
     </div>
     <div class="arenaentry page">
       {{> nav}}
@@ -34,7 +32,20 @@
       {{> nav}}
       {{> battles}}
     </div>
-  </div>
+  </div>  
+  
+  <div class="modal hide" id="modalConfirm">
+    <div class="modal-header">
+      <h3>确认你的动作</h3>
+    </div>
+    <div class="modal-body">
+      <p id="theWordsToBeComfirm"></p>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">取消</a>
+      <a href="#" class="btn btn-primary">确定</a>
+    </div>
+  </div>  
 </template>
 
 <template name="nav">
@@ -85,8 +96,8 @@
           <form class="form-horizontal" onsubmit="return false">
             <div class="input-append" id="battle-entry">
               <div><button id="new-battle-btn" class="btn btn-large" type="button">新建战场</button></div>
-              <div><br />或<br /><br /></div>
-              <input class="span3" type="text" id="battle-entry-input" placeholder="回到过去的战场,请输入战场ID" /><button id="battle-entry-btn" class="btn" type="button">确定</button>
+              <div><br />或回到过去的战场<br /><br /></div>
+              <input class="span3" type="text" id="battle-entry-input" placeholder="请输入战场ID" value="{{battleId}}" /><button id="battle-entry-btn" class="btn" type="button">确定</button>
             </div>
           </form>
         </td>
@@ -164,46 +175,69 @@
           <div class="opponent">
             <div class="player">
               {{#if opponent.turn}}
-              <i class="icon-time icon-large"></i>&nbsp;
+              &nbsp;  <i class="icon-time icon-large"></i>
               {{else}}
-              <i class="icon-plus icon-large"></i>&nbsp;
+              &nbsp;<i class="icon-plus icon-large"></i>
               {{/if}}
               {{opponent.user}}
             </div>  
-            <div class="hp">H 20 P 0</div>
-            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardOpponent">坟场{{opponent.graveyard.length}}</a></div>
-            <div class="exile"><a data-toggle="modal" href="#modalExileOpponent">场外{{opponent.exile.length}}</a></div>
-            <div class="hand">手牌{{opponent.hand.length}}</div>
-            <div class="library">牌库{{opponent.library.length}}</div> 
+            <div class="hp">生命 {{opponent.life}}</div>
+            <div class="hp">中毒 {{opponent.poison}}</div>
+            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardOpponent">坟场 {{opponent.graveyard.length}}</a></div>
+            <div class="exile"><a data-toggle="modal" href="#modalExileOpponent">场外 {{opponent.exile.length}}</a></div>
+            <div class="hand">手牌 {{opponent.hand.length}}</div>
+            <div class="library">牌库 {{opponent.library.length}}</div> 
           </div>
           <div class="self">
             <div class="player">
               {{#if self.turn}}
-              <i class="icon-time icon-large"></i>&nbsp;
+              &nbsp;<i class="icon-time icon-large"></i>
               {{else}}
-              <i class="icon-plus icon-large"></i>&nbsp;
+              &nbsp;<i class="icon-plus icon-large"></i>
               {{/if}}
               {{self.user}}
             </div> 
-            <div class="hp">H 20 P 0</div>
-            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardSelf">坟场{{self.graveyard.length}}</a></div>
-            <div class="exile"><a data-toggle="modal" href="#modalExileSelf">场外{{self.exile.length}}</a></div>
-            <div class="hand">手牌{{self.hand.length}}</div>
-            <div class="library"><a data-toggle="modal" href="#modalLibrarySelf">牌库{{self.library.length}}</a></div>            
+            <div class="hp">生命 {{self.life}}</div>
+            <div class="hp">中毒 {{self.poison}}</div>
+            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardSelf">坟场 {{self.graveyard.length}}</a></div>
+            <div class="exile"><a data-toggle="modal" href="#modalExileSelf">场外 {{self.exile.length}}</a></div>
+            <div class="hand">手牌 {{self.hand.length}}</div>
+            <div class="library"><a id="preModalLibrary" href="#">牌库 {{self.library.length}}</a></div>            
           </div>
         </div>
         <div class="operations">
+          <div> 战场ID: {{battleId}}</div>
           <a id="shuffle" href="#">洗牌</a>
-          <a id="libToHand" href="#">摸一张牌</a>
           <a id="libToExamine" href="#">检视</a>
+          <a id="libToHand" href="#">摸一张牌</a>
           <a id="handToReveals" href="#">展示手牌</a>
-          <a id="tokenCreate" href="#">衍生物</a>
+          <a id="tokenCreate" href="#">＋衍生物</a>
           <a id="turnBegin" href="#">我的回合</a>
           <a id="turnFin" href="#">回合结束</a>
+          <hr />
+          <div class="row-fluid">
+            <div class="span5"><a id="lifePlus" href="#">＋生</a></div>
+            <div class="span7"><a id="lifeMinus" href="#">命 -</a></div>
+          </div>
+          <div class="row-fluid">
+            <div class="span5"><a id="poisonPlus" href="#">＋中</a></div>
+            <div class="span7"><a id="poisonMinus" href="#">毒 -</a></div>
+          </div>       
+          <hr />
           <a id="libHand7" href="#">摸七张牌</a>
+          <a id="fightFin" href="#">放弃比赛</a>
+          <hr />
+          <a id="msgDice" href="#">掷骰子</a>
+          <a id="msgPreAttack" href="#">攻击前</a>
+          <a id="msgPreFin" href="#">回合结束前</a>
+          <a id="msgPass" href="#">让过</a>     
         </div>
         <div class="chatroom">
-          chatroom
+          <div class="messages" id="messages">
+            聊天室
+            {{> messages}}
+          </div>
+          <div><input type="text" id="messageInput" placeholder="你想说点什么?"></div>
         </div>
       </div>
       <div id="modalLibrarySelf" class="modal hide">
@@ -243,6 +277,15 @@
     </div>
   </div>
   <div id="small_image_mask"></div>
+</template>
+
+<template name="messages">
+  {{#each messages}}
+    <div>
+      <span class="userTitle">{{user}}:</span><br />
+      <span class="label label-{{type}}">{{message}} </span>
+    </div>
+  {{/each}}
 </template>
 
 <template name="dirs">
@@ -376,23 +419,4 @@
     <button class="dir_images card_large" style=background-image:url({{this}})>{{this}}</button>
     {{/each}}
   </div>
-</template>
-
-<template name="entry">
-  <p>
-    <input type="text" id="name" placeholder="Your name">
-    <input type="text" id="messageBox" placeholder="What do you want to say?">
-  </p>
-</template>
-
-<template name="messages">
-  <div id="chat">
-    {{#each messages}}
-      {{> message}}
-    {{/each}}
-  </div>
-</template>
-
-<template name="message">
-  <p>{{name}}: {{message}}</p>
 </template>
