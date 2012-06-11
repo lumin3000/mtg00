@@ -15,7 +15,7 @@ message = (->
   update:(d,id,u)->
     d = message:d,type:'normal' if typeof d == 'string'
     messages = @index @messagesId||id
-    messages = messages.splice(messages.length-101) if message.length-101>0
+    messages = messages.splice(messages.length-101) if message.length-200>0
     messages.push user:u||user.show(),message:d.message,type:d.type
     Messages.update (_id:@messagesId||id),messages:messages
   index:(id)->
