@@ -1,0 +1,318 @@
+body {
+  font-family: "Hiragino Sans GB",hei,"microsoft yahei",sans-serif;
+}
+
+a {
+  color:black;
+}
+
+.container-fluid {padding:3px}
+
+
+#messageBox {
+  width:300px;
+}
+
+
+
+#chat {
+  height: 300px;
+  width: 440px;
+  overflow: scroll;
+  padding: 10px 10px 40px 10px;
+  border: 1px black solid;
+}
+
+
+.link {
+  cursor:pointer
+}
+
+button.rotate,
+div.rotate,
+span.rotate{
+  -webkit-transform: rotate(90deg) scale(1);
+  -moz-transform: rotate(90deg) scale(1.5);
+  -o-transform: rotate(90deg) scale(1.5);
+  transform: rotate(90deg) scale(1.5);
+  margin:2px 34px;
+}
+
+.link:active{
+  cursor:pointer;
+  background-color: black;
+  color:white
+}
+
+#pages {
+  position:absolute;
+  height:100%;
+  width:100%
+}
+
+.page {
+  display:none;
+  height:100%
+}
+
+.portal .portal,
+.deck .deck, 
+.register .register,
+.arena .arena,
+.arenaentry .arenaentry,
+.arenadeck .arenadeck {
+  display:block;
+}
+
+.portal table,
+.arenaentry table,
+.register table{
+  height:100%;
+  width:100%;
+}
+
+.portal td,
+.arenaentry td,
+.register td{
+  text-align: center;
+}
+
+
+.loading{
+  display:block;
+  background:white;
+  height:100px;
+  line-height:200px;
+  position: relative;
+  top:-100px
+}
+div.loaded {
+  display:none
+}
+
+.portal .link {
+  line-height:38px;
+  margin:15px;
+}
+
+.deck #decklist{
+  border-left:1px solid #ccc;
+  min-height: 600px;
+}
+.deck .decklist{
+  
+  margin-left:5px
+}
+
+#dirs{
+  position:relative;
+}
+#image_mask{
+  height:250px;
+  width:140px;
+  position:absolute;
+  display:none;
+  background:rgba(255, 255, 255, 0.6);
+  overflow:hidden;
+  padding:50px;
+  font-size:24px;
+}
+
+#image_mask a{
+  line-height:80px;
+  display:block;
+}
+
+#small_deck_mask,
+#small_image_mask{
+  height:192px;
+  width:132px;
+  position:absolute;
+  display:none;
+  background:rgba(255, 255, 255, 0.6);
+  overflow:hidden;
+  padding:5px;
+  font-size:14px;
+  z-index:1800;
+}
+
+
+#small_image_mask a{
+  display:inline-block;
+  padding:5px;
+}
+
+#small_deck_mask a{
+  display:block;
+  margin:15px;
+  padding:5px;
+  text-align: center;
+}
+
+.deck1, .deck2{
+  clear:both;
+  margin:20px 0px;
+}
+
+.deckimages {
+  width:140px;
+  margin-bottom:10px;
+  float:left;
+}
+.card_normal{
+  text-decoration:none;
+  display:block;
+  float:left;
+  width:136px;
+  height:198px;
+  overflow: hidden;
+  border:3px solid black;
+  border-radius:5px;
+  margin:2px;
+  font-size:0px;
+  background-size:159px 220px;
+  background-repeat: no-repeat;
+  background-position:-15px -14px;
+}
+
+.card_large{
+  text-decoration:none;
+  display:block;
+  float:left;
+  width:228px;
+  height:336px;
+  overflow: hidden;
+  border:5px solid black;
+  border-radius:15px;
+  background-position:-20px;
+  margin:3px;
+  font-size:0px;
+}
+
+.deck-multi-select {
+  height:418px
+  
+}
+#modalNewDeck{
+  height:214px;
+  padding-top:100px;
+  display:none;
+}
+#modalNewDeck form{
+  margin-left:110px
+}
+
+.deckimages h4 {
+  font-size:14px;
+  text-align:right
+}
+.battles hr {
+  margin:0px
+}
+
+#battle-deck .battle-deck-operation,
+#battle-decks .battle-decks-operation{
+  display:block;
+}
+
+
+.battle-deck-operation,
+.battle-decks-operation,
+#battle-deck .cardBackup,
+#battle-deck .minus1,
+#battle-deck .minus2,
+#battle-deck .plus1,
+#battle-deck .plus2,
+#battle-decks .modalNewDeck-btn,
+#battle-deck .deck-operation{
+  display:none
+}
+
+.cardBackup{
+  clear:both
+}
+.cardJson{
+  height:100px
+}
+
+.operations,
+.board{
+  width:50%;
+  float:left;
+  height:408px;
+  font-size: 14px;
+}
+
+
+.board .icon-plus{
+  color:white;
+}
+
+.board .player{margin-left:-20px}
+
+.operations a{
+  display: block;
+}
+
+.fieldcard button{
+  text-shadow:-1px 0 yellow, 0 1px yellow, 1px 0 yellow, 0 -1px yellow;
+  font-size:20px;
+}
+
+.opponent,
+.self .fieldcard,
+.self .examineAndHandCard{
+  height:204px;
+  position:relative;
+
+}
+
+.zones .self{
+  height:408px;
+  position:relative;
+}
+
+.sideway .chatroom,
+.sideway .self{
+  height:204px;
+}
+
+.battles .modal{
+  width:580px;
+  height:400px;
+  padding:50px;
+}
+
+
+.zones {
+  overflow-x:scroll;
+  overflow-y:hidden;
+  border-right:1px solid black;
+  position:relative;
+}
+
+
+.handcard{
+  display:inline-block
+}
+.stackcard{
+  display: inline-block;
+  background-color: orangeRed;
+}
+
+.examinecard{
+  display: inline-block;
+  background-color: greenyellow;
+}
+
+.revealscard{
+  display: inline-block;
+  background-color: gold;
+}
+
+.attaching{
+  opacity:0.7
+}
+
+
+

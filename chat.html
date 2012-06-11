@@ -1,0 +1,398 @@
+<head>
+<title>MTG-野猪奔跑的世界</title>
+<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbBSAcACBAAAeaR9cIAAAAASUVORK5CYII=" rel="icon" type="image/x-icon" />
+<meta charset="UTF-8" />
+<meta content="True" name="HandheldFriendly" />
+</head>
+<body>
+  {{> pages}}
+</body>
+
+<template name="pages">
+  <div id="pages" class={{pages}}>
+    <div class="register page">
+      {{> register}}
+    </div>
+    <div class="portal page">
+      {{> portal}}
+      </div>
+    <div class="deck page">
+      {{> nav}}
+      {{> dirs}}
+      {{> messages}}
+      {{> entry}}      
+    </div>
+    <div class="arenaentry page">
+      {{> nav}}
+      {{> battleentry}}
+    </div>
+    <div class="arenadeck page">
+      {{> nav}}
+      {{> battledeck}}
+    </div>
+    <div class="arena page">
+      {{> nav}}
+      {{> battles}}
+    </div>
+  </div>
+</template>
+
+<template name="nav">
+  <div>
+    <a id="dirtohome"><i class="icon-home icon-large link"></i></a>
+  </div>
+</template>
+
+<template name="portal">
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <div id="gotodeck" class="link">
+            <i class="icon-th"></i>&nbsp;构筑
+          </div>
+          <div id="gotoarena" class="link ">
+            <i class="icon-trophy"></i>&nbsp;比赛
+          </div>
+          <div class="loading {{loading}}">努力加载中,请稍候...</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<template name="register">
+  <table>
+    <tbody>  
+      <tr>
+        <td>
+          <form class="form-horizontal" onsubmit="return false">
+            <div class="input-append" id="usernamediv">
+              <input class="span3" type="text" id="usernameinput" placeholder="你的名字" /><button id="usernamebtn" class="btn" type="button">确定</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<template name="battleentry">
+  <table>
+    <tbody>  
+      <tr>
+        <td>
+          <form class="form-horizontal" onsubmit="return false">
+            <div class="input-append" id="battle-entry">
+              <div><button id="new-battle-btn" class="btn btn-large" type="button">新建战场</button></div>
+              <div><br />或<br /><br /></div>
+              <input class="span3" type="text" id="battle-entry-input" placeholder="回到过去的战场,请输入战场ID" /><button id="battle-entry-btn" class="btn" type="button">确定</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<template name="battledeck">
+  <div> 当前战场ID: {{battleId}}</div>
+  <div class="span9" id="battle-deck">
+    {{> deck}}
+  </div>
+  <div class="span3" id="battle-decks">
+    {{> decks}}
+  </div>
+  
+</template>
+
+<template name="battles">
+  <div class="container-fluid">
+    <div class="row-fluid battles">
+    {{#with battle}}  
+      <div class="span10 zones">
+        <div class="opponent">
+          <div class="mainzone" style="width:{{othersLength}}px">
+            <span class="revealscard">
+              {{#each_with_index reveals}}
+                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+              {{/each_with_index}}                
+            </span>
+            <span class="stackcard">
+              {{#each_with_index stack}}
+                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+              {{/each_with_index}}                
+            </span>
+            <span class="fieldcard">
+              {{#each opponent.staff}}
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+              {{/each}}
+              {{#each opponent.land}}
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+              {{/each}}
+            </span>
+          </div>
+        </div>
+        <hr />
+        <div class="self">
+          <div class="mainzone">
+            <div class="fieldcard" style="width:{{self.fieldLength}}px">
+              {{#each self.staff}}
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+              {{/each}}
+              {{#each self.land}}
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}"  name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+              {{/each}}
+            </div>
+            <div class="examineAndHandCard" style="width:{{self.handLength}}px">
+              <span class="examinecard">
+                {{#each_with_index self.examine}}
+                  <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+                {{/each_with_index}}
+              </span>
+              <span class="handcard">
+              {{#each_with_index self.hand}}
+                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+              {{/each_with_index}}
+            </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="span2 sideway">
+        <div class="board">
+          <div class="opponent">
+            <div class="player">
+              {{#if opponent.turn}}
+              <i class="icon-time icon-large"></i>&nbsp;
+              {{else}}
+              <i class="icon-plus icon-large"></i>&nbsp;
+              {{/if}}
+              {{opponent.user}}
+            </div>  
+            <div class="hp">H 20 P 0</div>
+            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardOpponent">坟场{{opponent.graveyard.length}}</a></div>
+            <div class="exile"><a data-toggle="modal" href="#modalExileOpponent">场外{{opponent.exile.length}}</a></div>
+            <div class="hand">手牌{{opponent.hand.length}}</div>
+            <div class="library">牌库{{opponent.library.length}}</div> 
+          </div>
+          <div class="self">
+            <div class="player">
+              {{#if self.turn}}
+              <i class="icon-time icon-large"></i>&nbsp;
+              {{else}}
+              <i class="icon-plus icon-large"></i>&nbsp;
+              {{/if}}
+              {{self.user}}
+            </div> 
+            <div class="hp">H 20 P 0</div>
+            <div class="graveyard"><a data-toggle="modal" href="#modalGraveyardSelf">坟场{{self.graveyard.length}}</a></div>
+            <div class="exile"><a data-toggle="modal" href="#modalExileSelf">场外{{self.exile.length}}</a></div>
+            <div class="hand">手牌{{self.hand.length}}</div>
+            <div class="library"><a data-toggle="modal" href="#modalLibrarySelf">牌库{{self.library.length}}</a></div>            
+          </div>
+        </div>
+        <div class="operations">
+          <a id="shuffle" href="#">洗牌</a>
+          <a id="libToHand" href="#">摸一张牌</a>
+          <a id="libToExamine" href="#">检视</a>
+          <a id="handToReveals" href="#">展示手牌</a>
+          <a id="tokenCreate" href="#">衍生物</a>
+          <a id="turnBegin" href="#">我的回合</a>
+          <a id="turnFin" href="#">回合结束</a>
+          <a id="libHand7" href="#">摸七张牌</a>
+        </div>
+        <div class="chatroom">
+          chatroom
+        </div>
+      </div>
+      <div id="modalLibrarySelf" class="modal hide">
+      {{#each_with_index self.library}}
+        <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+      {{/each_with_index}}
+      </div>
+      
+      <div id="modalGraveyardSelf" class="modal hide">
+      {{#each_with_index self.graveyard}}
+        <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+      {{/each_with_index}}
+      </div>
+      
+      <div id="modalExileSelf" class="modal hide">
+      {{#each_with_index self.exile}}
+        <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+      {{/each_with_index}}
+      </div>      
+
+      <div id="modalGraveyardOpponent" class="modal hide">
+      {{#each_with_index opponent.graveyard}}
+        <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+      {{/each_with_index}}        
+      </div>
+
+      <div id="modalExileOpponent" class="modal hide">
+      {{#each_with_index opponent.exile}}
+        <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+      {{/each_with_index}}        
+      </div>
+      
+      <div id="modalTxt" class="modal hide">
+        <input id="txtHidden" type="hidden" /><input id="txtInput" type="text" /><button id="txtBtn">标注</button>
+      </div>
+      {{/with}}
+    </div>
+  </div>
+  <div id="small_image_mask"></div>
+</template>
+
+<template name="dirs">
+  <div class="container-fluid">
+    <div class="row-fluid container-lib">
+      <div class="span9 lib">
+        <div id="dirs">
+          <h3>T2牌库</h3>
+          <div>
+            {{#each dirs}}
+              <a class="dirs link">{{this}}</a>&nbsp;&nbsp;
+            {{/each}}
+          </div>
+          <h3>&nbsp;</h3>
+        </div>
+        {{> dir}}
+        {{> dirImages}}
+      </div>
+      <div class="span3" id="decklist">
+        <div class="decklist">
+          <ul class="nav nav-tabs" id="deck-toggle">
+            <li class="active">
+              <a href="#container-deck" data-toggle="tab">
+              {{deckname}}
+              </a>
+            </li>
+            <li id="show-decks">
+              <a href="#container-decks" data-toggle="tab">
+                所有套牌
+              </a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="container-deck">{{> deck}}</div>
+            <div class="tab-pane" id="container-decks">{{> decks}}</div>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div id="image_mask">
+        <a href="#" id="add_to_main">主牌➡</a>
+        <a href="#" id="add_to_backup">备牌➡</a>
+      </div>
+
+
+      <div id="modalNewDeck" class="modal">
+        <div class="modal-body">
+          <form class="form-horizontal" onsubmit="return false">
+          <input class="span3" type="text" id="decknameinput" placeholder="套牌名称" /><button id="decknamebtn" class="btn" type="button">确定</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<template name="decks">
+  <div class="battle-decks-operation">
+    挑选一副作战用套牌
+  </div>
+  <a data-toggle="modal" href="#modalNewDeck" class="btn modalNewDeck-btn"><i class="icon-plus icon-large"></i>&nbsp;&nbsp;新建套牌</a>
+  <hr />
+  <select multiple="multiple" class="deck-multi-select">
+    {{#each decks}}
+      <option value={{this._id}}>{{this.name}}-{{this.user}}</option>
+    {{/each}}
+  </select>
+
+  
+</template>
+
+<template name="deck">
+  <div id="small_deck_mask" class="small_deck_mask"></div>
+  <div class="battle-deck-operation">
+    <a class="btn battle-begin"><i class="icon-adjust icon-large"></i>&nbsp;&nbsp;开始比赛</a>
+  </div>
+  {{#if deckname}}
+  {{else}}
+    <div class="deck-operation">
+      <a data-toggle="modal" href="#modalNewDeck" class="btn"><i class="icon-upload-alt icon-large"></i>&nbsp;&nbsp;保存我的套牌</a>
+      <a id="resetdeck" class="btn"><i class="icon-trash icon-large"></i>&nbsp;&nbsp;重置</a>
+    </div>  
+  {{/if}}
+  <div class="deck1">
+    {{#with dirImages1}}
+      <div>主牌{{total}}张</div>
+      {{#each list}}
+        <div class="deckimages">
+          <button class="dir_images card_normal" style=background-image:url({{this.key}}) name={{this.key}}>{{this.key}}</button>
+          <h4>x{{this.value}}</h4>
+        </div>
+      {{/each}}
+    {{/with}}
+  </div>
+  <div class="deck2">
+    {{#with dirImages2}}
+      <div>备牌{{total}}张</div>
+      {{#each list}}
+        <div class="deckimages">
+          <button class="dir_images card_normal" style=background-image:url({{this.key}}) name={{this.key}}>{{this.key}}</button>
+          <h4>x{{this.value}}</h4>
+        </div>
+      {{/each}}
+    {{/with}}
+  </div>
+  <form class="cardBackup" onsubmit="return false">
+    <hr />
+    <div>备份/恢复牌表</div>
+    <textarea class="cardJson">{{cardJson}}</textarea>
+    <div><button class="cardReload">重载</button></div>
+  </form>
+</template>
+  
+  
+  
+  
+<template name="dir">
+  <div id="dir" class="well">
+    <div>{{dirName}}</div>
+      {{#each dir}}
+      <a class="dir link">{{this}}</a>&nbsp;&nbsp;&nbsp;&nbsp;
+      {{/each}}
+  </div>
+</template>
+
+<template name="dirImages">
+  <div id="dir_images">
+    {{#each dirImages}}
+    <button class="dir_images card_large" style=background-image:url({{this}})>{{this}}</button>
+    {{/each}}
+  </div>
+</template>
+
+<template name="entry">
+  <p>
+    <input type="text" id="name" placeholder="Your name">
+    <input type="text" id="messageBox" placeholder="What do you want to say?">
+  </p>
+</template>
+
+<template name="messages">
+  <div id="chat">
+    {{#each messages}}
+      {{> message}}
+    {{/each}}
+  </div>
+</template>
+
+<template name="message">
+  <p>{{name}}: {{message}}</p>
+</template>
