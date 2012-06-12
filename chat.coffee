@@ -47,7 +47,8 @@ if Meteor.is_client
       (->linkHtml l[0],l[1],l[2]||null,l[3]||null for l in links)().join ''
     cardHash:(imageUrl)->
       imageUrl.replace('.jpg','').replace Card._domain,''
-
+      
+      
   closeModal = ->
     for d in $ ".modal"
       dom = $ d 
@@ -91,15 +92,19 @@ if Meteor.is_client
         Session.set 'pages','portal'       
   )()
   
-  confirm = (->
-    create:(word,fn)->
-      dom = $ '#modalConfirm'
-      $('#theWordsToBeComfirm').html word
-      $('#modalConfirm .btn-primary').click ->
-        dom.modal 'hide'
-        fn()
-      dom.modal 'show'
-  )()  
+  confirm=(word,fn)->
+    dom = $ '#modalConfirm'
+    $('#theWordsToBeComfirm').html word
+    $('#modalConfirm .btn-primary').off()
+    $('#modalConfirm .btn-primary').on "click", ->
+      dom.modal 'hide'
+      fn()
+    dom.modal 'show'
+    
+  zoomIn=(html)->
+    dom = $ '#modalZoomIn'
+    $('#theHtmlToBeZoomIn').html html
+    dom.modal 'show'
   
   portal = (->
     Template.portal.events =
@@ -249,6 +254,10 @@ if Meteor.is_client
 
 
     Template.battles.events = 
+      'click .zoomIn':(event)->
+        imageUrl = $(event.target).attr 'name'
+        zoomIn "<img src=\"#{imageUrl}\" />"
+        $('#small_image_mask').css 'display','none'
       'keyup #messageInput':(event)->
         dom = $ event.target
         if event.type == "keyup" && event.which == 13 && dom.val()!='' # [ENTER] 
@@ -270,7 +279,7 @@ if Meteor.is_client
         battle.play 'libraryToExamine',0,1
         message.update message:'检视一张牌',type:'inverse'
       'click #preModalLibrary':->
-        confirm.create '查看牌库是一个公开动作,确定要继续么?',->
+        confirm '查看牌库是一个公开动作,确定要继续么?',->
           $('#modalLibrarySelf').modal 'show'
           message.update message:'查看牌库',type:'inverse' 
       'click #handToReveals':->
@@ -289,11 +298,11 @@ if Meteor.is_client
       'click #poisonPlus':->battle.play 'poisonPlus',0,->message.update message:'中毒+1',type:'inverse'
       'click #poisonMinus':->battle.play 'poisonMinus',0,->message.update message:'中毒-1',type:'inverse'
       'click #libHand7':->
-        confirm.create '是否确认要摸七张牌?',->
+        confirm '是否确认要摸七张牌?',->
           battle.play 'libraryToHand',0,7
           message.update message:'摸了七张牌',type:'inverse'
       'click #fightFin':->
-        confirm.create '<span class="alert alert-error">是否确认要放弃比赛? 此动作不可撤销哟</span>', ->
+        confirm '<span class="alert alert-error">是否确认要放弃比赛? 此动作不可撤销哟</span>', ->
           battle.play 'fightFin',nullPlayer,->
             message.update message:'已经放弃比赛了',type:'important'           
             battle.edit()
@@ -305,7 +314,7 @@ if Meteor.is_client
         message.update message:'准备结束回合',type:'warning'
       'click #msgPass':->
         message.update message:'左思右量还是让过好了',type:'success'
-        
+      
 
           
 
@@ -353,6 +362,7 @@ if Meteor.is_client
           ['handToReveals','展示',index]
           ['handToLibrary','牌库顶',index,1]
           ['handToLibrary','牌库底',index,0]
+          ['zoomIn','放大',dom.attr 'title']
         ]
       'click .self .fieldcard .dir_images':(e)->
         dom = $ e.target
@@ -361,7 +371,7 @@ if Meteor.is_client
           ['tap','横置',index]
           ['untap','重置',index]
           ['plus','+1/+1',index]
-          ['minus','-1/-1',index]          
+          ['minus','-1/-1',index]       
         ]
         if dom.hasClass 'attaching'
           links.push ['changePositionZero','取消佩带',index]
@@ -378,7 +388,10 @@ if Meteor.is_client
             ['battlefieldToLibrary','牌库顶',index,1]
             ['battlefieldToLibrary','牌库底',index,0]    
           ]
-        links = links.concat [['txtModal','标注',index]]
+        links = links.concat [
+          ['txtModal','标注',index]
+          ['zoomIn','放大',dom.attr 'title']
+        ]
         mask.create dom,stringHelper.links links
       'click .stackcard .dir_images':(e)->
         dom = $ e.target
@@ -390,6 +403,7 @@ if Meteor.is_client
           ['stackToExile','放逐',index]
           ['stackToLibrary','牌库顶',index,1]
           ['stackToLibrary','牌库底',index,0]
+          ['zoomIn','放大',dom.attr 'title']
         ]
       'click .examinecard .dir_images':(e)->
         dom = $ e.target
@@ -403,9 +417,10 @@ if Meteor.is_client
           ['examineToExile','放逐',index]
           ['examineToLibrary','牌库顶',index,1]
           ['examineToLibrary','牌库底',index,0]
+          ['zoomIn','放大',dom.attr 'title']
         ]
 
-      'click .revealscard .dir_images':(e)->
+      'click .revealscard .dir_images':(e)->      
         dom = $ e.target
         index = index_name dom
         mask.create dom,stringHelper.links [
@@ -416,7 +431,13 @@ if Meteor.is_client
           ['revealsToExile','放逐',index]
           ['revealsToLibrary','牌库顶',index,1]
           ['revealsToLibrary','牌库底',index,0]
+          ['zoomIn','放大',dom.attr 'title']
         ]
+      
+      'click .opponent .fieldcard .dir_images':(e)->
+        dom = $ e.target
+        index = index_name dom
+        mask.create dom,stringHelper.links [['zoomIn','放大',stringHelper.backgroundImage dom]]      
 
       'click #small_image_mask':(e)->
         dom = $ e.target
@@ -641,9 +662,9 @@ if Meteor.is_client
       'keyup #decknameinput': (event) ->
         if event.type == "keyup" && event.which == 13# [ENTER]
           deck.create $("#decknameinput").val()
-          $("#new-deck").modal 'hide'
+          $("#modalNewDeck").modal 'hide'
       'click #decknamebtn':->
-        $("#new-deck").modal 'hide'
+        $("#modalNewDeck").modal 'hide'
         deck.create $("#decknameinput").val()      
         
     
@@ -667,7 +688,6 @@ if Meteor.is_client
           e.target.size = e.target.options.length
           e.target.style.height ='auto'
       'change .deck-multi-select' : (e)->
-        console.log "deck-multi-select" 
         dom = $ e.target
         return true if !dom.val()
         _id = dom.val()[0]

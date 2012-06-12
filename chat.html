@@ -46,6 +46,10 @@
       <a href="#" class="btn btn-primary">确定</a>
     </div>
   </div>  
+  
+  <div class="modal hide" id="modalZoomIn">
+    <div id="theHtmlToBeZoomIn"></div>
+  </div>  
 </template>
 
 <template name="nav">
@@ -126,20 +130,20 @@
           <div class="mainzone" style="width:{{othersLength}}px">
             <span class="revealscard">
               {{#each_with_index reveals}}
-                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+                <button class="dir_images card_normal" title="{{item}}" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
               {{/each_with_index}}                
             </span>
             <span class="stackcard">
               {{#each_with_index stack}}
-                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+                <button class="dir_images card_normal" title="{{item}}" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
               {{/each_with_index}}                
             </span>
             <span class="fieldcard">
               {{#each opponent.staff}}
-                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" title="{{item.image}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
               {{/each}}
               {{#each opponent.land}}
-                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" title="{{item.image}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
               {{/each}}
             </span>
           </div>
@@ -149,21 +153,21 @@
           <div class="mainzone">
             <div class="fieldcard" style="width:{{self.fieldLength}}px">
               {{#each self.staff}}
-                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}" title="{{item.image}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
               {{/each}}
               {{#each self.land}}
-                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}"  name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
+                <button class="dir_images card_normal {{#if item.token}}token{{/if}} {{#if item.tap}}rotate{{/if}} {{#if item.attaching}}attaching{{/if}}"title="{{item.image}}" name="{{index}}" style=background-image:url({{item.image}})>{{{item.html}}}</button>
               {{/each}}
             </div>
             <div class="examineAndHandCard" style="width:{{self.handLength}}px">
               <span class="examinecard">
                 {{#each_with_index self.examine}}
-                  <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+                  <button class="dir_images card_normal" title="{{item}}" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
                 {{/each_with_index}}
               </span>
               <span class="handcard">
               {{#each_with_index self.hand}}
-                <button class="dir_images card_normal" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
+                <button class="dir_images card_normal" title="{{item}}" name="{{index}}" style=background-image:url({{item}})>{{item}}</button>
               {{/each_with_index}}
             </span>
             </div>
