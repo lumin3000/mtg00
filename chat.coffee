@@ -229,10 +229,13 @@ if Meteor.is_client
           i.html.push '⬅ 佩带/附着'if i.attaching
           i.html.push if i.counters==0 then '' else "#{i.counters}/#{i.counters}"
           i.html = "#{i.html.join '<br />'}<br /><br />&nbsp;"
-          if i.image.indexOf('/land/')>=0
-            data[el].land.push index:_i,item:i
+          if i.image || i.land
+            if i.image.indexOf('/land/')>=0
+              data[el].land.push index:_i,item:i
+            else
+              data[el].staff.push index:_i,item:i
           else
-            data[el].staff.push index:_i,item:i
+            console.log "i.image=null"
       if opponent
         data.othersLength = (data.reveals.length+data.stack.length+data[opponent].battlefield.length)*204
       data
@@ -376,7 +379,10 @@ if Meteor.is_client
         if dom.hasClass 'attaching'
           links.push ['changePositionZero','取消佩带',index]
         else
-          links = links.concat [['changePositionBegin','佩带附着',index],['changePositionFin','佩上附上',index]]
+          links = links.concat [
+            ['changePositionBegin','佩带附着']
+            ['changePositionFin','佩上附上',index,dom.attr('title').indexOf '/land/']
+          ]
         if dom.hasClass 'token'
           links = links.concat [['tokenDestory','消失',index]]
         else
@@ -446,13 +452,14 @@ if Meteor.is_client
     
     playHelper = (->
       changePositionCache=false
-      changePositionBegin:(sourceIndex)->
+      changePositionBegin:(sourceIndex,land)->
         $("#small_image_mask").css 'display','none'
         changePositionCache = sourceIndex
-      changePositionFin:(targetIndex)->
+      changePositionFin:(targetIndex,land)->
+        if land >=0 then true else false
         return true if changePositionCache==false
         targetIndex = if targetIndex==true then 0 else targetIndex+1
-        Meteor.call "attach",battleId,player,changePositionCache,targetIndex
+        Meteor.call "attach",battleId,player,changePositionCache,targetIndex,land
         changePositionCache = false
       changePositionZero:(sourceIndex)->
         @changePositionBegin sourceIndex

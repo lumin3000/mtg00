@@ -137,8 +137,10 @@ battleMethods2=
     d[player].library = []
     d[player].library = d[player].library.concat tempArray[i] for i in [0..tempArray.length-1]
     Battle.update d
-  attach:(battleId,player,sourceIndex,targetIndex)->
+  attach:(battleId,player,sourceIndex,targetIndex,land)->
     d = Battle.show battleId
+    d[player].battlefield[sourceIndex].land = true if land
+    delete d[player].battlefield[sourceIndex].land if targetIndex==0
     d[player].battlefield[sourceIndex].attaching = if targetIndex==0 then false else true
     d[player].battlefield.splice targetIndex,0,d[player].battlefield.splice(sourceIndex,1)[0]
     Battle.update d
